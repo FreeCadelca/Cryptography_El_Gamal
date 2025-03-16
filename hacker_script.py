@@ -41,11 +41,11 @@ def mitm():
     print(f"Злоумышленник получил шифротекст от клиента: {ciphertext_from_client}")
 
     # Расшифровываем сообщение клиента
-    plaintext = decrypt(hacker_private_key, hacker_public_key, ciphertext_from_client)
+    plaintext = decrypt_line(hacker_private_key, hacker_public_key, ciphertext_from_client)
     print(f"Злоумышленник расшифровал сообщение клиента: {plaintext}")
 
     # Зашифровываем сообщение для настоящего сервера его же ключом
-    ciphertext_for_server = encrypt(plaintext, server_public_key)
+    ciphertext_for_server = encrypt_line(plaintext, server_public_key)
     print(f"Злоумышленник перезашифровал сообщение для сервера: {ciphertext_for_server}")
 
     # Пересылаем перезашифрованное сообщение настоящему серверу

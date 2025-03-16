@@ -27,7 +27,7 @@ def server():
     print(f"Полученный шифротекст: {ciphertext}")
 
     # Расшифровываем сообщение
-    decrypted_message = decrypt(private_key, public_key, ciphertext)
+    decrypted_message = decrypt_line(private_key, public_key, ciphertext)
     print(f"Расшифрованное сообщение: {decrypted_message}")
 
     conn.close()

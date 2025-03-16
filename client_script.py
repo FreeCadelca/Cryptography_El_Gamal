@@ -14,7 +14,7 @@ def client(message):
     print(f"Получен открытый ключ: {public_key}")
 
     # Шифрование сообщения
-    ciphertext = encrypt(message, public_key)
+    ciphertext = encrypt_line(message, public_key)
     print(f"Зашифрованное сообщение: {ciphertext}")
 
     # Отправка шифротекста серверу
@@ -24,5 +24,5 @@ def client(message):
 
 
 if __name__ == "__main__":
-    message = int(input("Введите сообщение для зашифрования "))
+    message = input("Введите сообщение для зашифрования ")
     client(message)

@@ -65,13 +65,14 @@ def key_gen() -> dict[str: tuple[int, int, int], str: int]:
     # print(f'p: {p}')
     g = find_g(p)
     x = random.randint(2, p - 2)
-    y = mod_pow(g, x, p)
-    return {'public': (y, g, p), 'private': x}
+    h = mod_pow(g, x, p)
+    return {'public': (h, g, p), 'private': x}
 
 
-def encrypt(m: int, pub_key: tuple[int, int, int]) -> tuple[int, int]:
+def encrypt(m: int, pub_key: tuple[int, int, int], k=-1) -> tuple[int, int]:
     y, g, p = pub_key
-    k = random.randint(2, p - 2)
+    if k == -1:
+        k = random.randint(2, p - 2)
     a = mod_pow(g, k, p)
     b = (m * mod_pow(y, k, p)) % p
     return a, b
@@ -82,10 +83,51 @@ def decrypt(priv_key: int, pub_key: tuple[int, int, int], ciphertext: tuple[int,
     x = priv_key
     a, b = ciphertext
     return b * IntM(mod_pow(a, x, p), p).inv().value % p
-    # IntM(value, modulo).inv().value - is a inverting of value by modulo p
 
 
-# if __name__ == "__main__":
-#     keys = key_gen()
-#     message = int(input())
-#     print(decrypt(keys["private"], keys["public"], encrypt(214, keys["public"])))
+def tuple_cipher_to_str(c: tuple[int, int]) -> str:
+    return str(c[0]).zfill(17) + str(c[1]).zfill(17)
+
+
+def str_to_tuple_cipher(s: str) -> tuple[int, int]:
+    return int(s[:17]), int(s[17:])
+
+
+def encrypt_line(s: str, pub_key: tuple[int, int, int], k=-1) -> str:
+    message = [ord(i) for i in s]
+    return "".join([tuple_cipher_to_str(encrypt(i, pub_key)).zfill(17) for i in message])
+
+
+def decrypt_line(priv_key: int, pub_key: tuple[int, int, int], text: str) -> str:
+    ciphertext = [str_to_tuple_cipher(text[i:i + 34]) for i in range(0, len(text), 34)]
+    return "".join([chr(decrypt(priv_key, pub_key, ciphertext[i])) for i in range(len(ciphertext))])
+
+
+if __name__ == "__main__":
+    text = input("Введите текст:\n")
+    mode = int(input("Введите режим работы - зашифрование/расшифрование/зашифрование числа/расшифрование числа [0/1/2/3]:\n"))
+    if mode == 0:
+        keys = key_gen()
+        print(f"Ключи: (private: {keys["private"]}, public: {keys["public"]})")
+        message = [ord(i) for i in text]
+        ciphertext = "".join([tuple_cipher_to_str(encrypt(i, keys["public"])).zfill(17) for i in message])
+        print("ciphertext:", ciphertext)
+    elif mode == 1:
+        key_private = int(input("Введите приватный ключ:\n"))
+        key_public = tuple(map(int, input("Введите публичный ключ (h, g, p через пробел):\n").split()))
+        ciphertext = [str_to_tuple_cipher(text[i:i + 34]) for i in range(0, len(text), 34)]
+        plaintext = "".join([chr(decrypt(key_private, key_public, ciphertext[i])) for i in range(len(ciphertext))])
+        print(plaintext)
+    elif mode == 2:
+        # keys = key_gen()
+        keys = {'public': (2, 2, 7), 'private': 4}
+        print(f"Ключи: (private: {keys["private"]}, public: {keys["public"]})")
+        message = int(text)
+        ciphertext = tuple_cipher_to_str(encrypt(message, keys["public"], k=3)).zfill(17)
+        print("ciphertext:", ciphertext)
+    elif mode == 3:
+        key_private = int(input("Введите приватный ключ:\n"))
+        key_public = tuple(map(int, input("Введите публичный ключ (h, g, p через пробел):\n").split()))
+        ciphertext = str_to_tuple_cipher(text)
+        plaintext = decrypt(key_private, key_public, ciphertext)
+        print(plaintext)
